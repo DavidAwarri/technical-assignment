@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "sonner";
 import { AuthProvider } from "./context/AuthContext";
 import { App } from "./ui/App";
 
@@ -11,6 +12,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <QueryClientProvider client={qc}>
       <AuthProvider>
         <App />
+        <Toaster position="bottom-right" />
       </AuthProvider>
     </QueryClientProvider>
   </React.StrictMode>

@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import { getTask, createComment, updateTask } from "../lib/api";
+import { Spinner } from "./Spinner";
 import type { Task } from "./BoardView";
 
 interface TaskDetailModalProps {
@@ -13,6 +15,7 @@ interface TaskDetailModalProps {
 
 export function TaskDetailModal({ task, boardId, onClose, onRefresh }: TaskDetailModalProps) {
   const { token } = useAuth();
+  const queryClient = useQueryClient();
   const [newCommentContent, setNewCommentContent] = useState("");
   const [isAddingComment, setIsAddingComment] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -20,7 +23,7 @@ export function TaskDetailModal({ task, boardId, onClose, onRefresh }: TaskDetai
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [editedDescription, setEditedDescription] = useState(task.description || "");
 
-  const { data: taskData, refetch: refetchTask } = useQuery({
+  const { data: taskData, isLoading, refetch: refetchTask } = useQuery({
     queryKey: ["task", task.id],
     queryFn: async () => {
       if (!token) throw new Error("No token");
@@ -40,7 +43,11 @@ export function TaskDetailModal({ task, boardId, onClose, onRefresh }: TaskDetai
     try {
       await createComment(task.id, newCommentContent, token);
       setNewCommentContent("");
-      refetchTask();
+      await refetchTask();
+      queryClient.invalidateQueries({ queryKey: ["board"] });
+      toast.success("Comment added");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to add comment");
     } finally {
       setIsAddingComment(false);
     }
@@ -55,10 +62,12 @@ export function TaskDetailModal({ task, boardId, onClose, onRefresh }: TaskDetai
     try {
       await updateTask(task.id, { title: editedTitle }, token);
       setIsEditingTitle(false);
-      refetchTask();
+      await refetchTask();
+      queryClient.invalidateQueries({ queryKey: ["board"] });
+      toast.success("Title updated");
       onRefresh();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to update task");
+      toast.error(err instanceof Error ? err.message : "Failed to update task");
     }
   };
 
@@ -71,10 +80,12 @@ export function TaskDetailModal({ task, boardId, onClose, onRefresh }: TaskDetai
     try {
       await updateTask(task.id, { description: editedDescription }, token);
       setIsEditingDescription(false);
-      refetchTask();
+      await refetchTask();
+      queryClient.invalidateQueries({ queryKey: ["board"] });
+      toast.success("Description updated");
       onRefresh();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to update task");
+      toast.error(err instanceof Error ? err.message : "Failed to update task");
     }
   };
 
@@ -167,14 +178,20 @@ export function TaskDetailModal({ task, boardId, onClose, onRefresh }: TaskDetai
               Comments ({currentTask.comments.length})
             </h3>
 
-            <div style={styles.commentsList}>
-              {currentTask.comments.map((comment) => (
-                <div key={comment.id} style={styles.comment}>
-                  <strong style={styles.commentAuthor}>{comment.user.name}</strong>
-                  <p style={styles.commentContent}>{comment.content}</p>
-                </div>
-              ))}
-            </div>
+            {isLoading ? (
+              <div style={{ minHeight: "100px" }}>
+                <Spinner />
+              </div>
+            ) : (
+              <div style={styles.commentsList}>
+                {currentTask.comments.map((comment) => (
+                  <div key={comment.id} style={styles.comment}>
+                    <strong style={styles.commentAuthor}>{comment.user.name}</strong>
+                    <p style={styles.commentContent}>{comment.content}</p>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <form onSubmit={handleAddComment} style={styles.commentForm}>
               <textarea

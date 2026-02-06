@@ -7,6 +7,9 @@ interface ColumnProps {
   onSelectTask: (taskId: string) => void;
   onMoveTask: (taskId: string, columnId: string, position: number) => void;
   onDeleteTask: (taskId: string) => void;
+  draggedTaskData?: { taskId: string; sourceColumnId: string } | null;
+  onDragStart?: (taskId: string) => void;
+  onDragEnd?: () => void;
 }
 
 export function ColumnComponent({
@@ -15,10 +18,12 @@ export function ColumnComponent({
   onSelectTask,
   onMoveTask,
   onDeleteTask,
+  draggedTaskData,
+  onDragStart,
+  onDragEnd,
 }: ColumnProps) {
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [isCreating, setIsCreating] = useState(false);
-  const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
 
   const handleCreateTask = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,12 +39,14 @@ export function ColumnComponent({
   };
 
   const handleDragStart = (taskId: string) => {
-    setDraggedTaskId(taskId);
+    onDragStart?.(taskId);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    e.currentTarget.style.backgroundColor = "#f0f0f0";
+    if (draggedTaskData) {
+      e.currentTarget.style.backgroundColor = "#f0f0f0";
+    }
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
@@ -50,14 +57,14 @@ export function ColumnComponent({
     e.preventDefault();
     e.currentTarget.style.backgroundColor = "transparent";
 
-    if (!draggedTaskId) return;
+    if (!draggedTaskData) return;
 
     const targetPosition = targetTaskId
       ? column.tasks.findIndex((t) => t.id === targetTaskId)
       : column.tasks.length;
 
-    onMoveTask(draggedTaskId, column.id, targetPosition);
-    setDraggedTaskId(null);
+    onMoveTask(draggedTaskData.taskId, column.id, targetPosition);
+    onDragEnd?.();
   };
 
   return (

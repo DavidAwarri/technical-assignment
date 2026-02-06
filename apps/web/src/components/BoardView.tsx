@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import { getBoard, createColumn, createTask, updateTask, deleteTask } from "../lib/api";
 import { ColumnComponent } from "./Column";
 import { TaskDetailModal } from "./TaskDetailModal";
+import { Spinner } from "./Spinner";
 
 interface BoardViewProps {
   boardId: string;
@@ -28,11 +30,13 @@ export interface Column {
 
 export function BoardView({ boardId, boardTitle, onBack }: BoardViewProps) {
   const { token } = useAuth();
+  const queryClient = useQueryClient();
   const [newColumnTitle, setNewColumnTitle] = useState("");
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [isCreatingColumn, setIsCreatingColumn] = useState(false);
+  const [draggedTaskData, setDraggedTaskData] = useState<{ taskId: string; sourceColumnId: string } | null>(null);
 
-  const { data: boardData, isLoading, refetch } = useQuery({
+  const { data: boardData, isLoading } = useQuery({
     queryKey: ["board", boardId],
     queryFn: async () => {
       if (!token) throw new Error("No token");
@@ -52,7 +56,10 @@ export function BoardView({ boardId, boardTitle, onBack }: BoardViewProps) {
     try {
       await createColumn(boardId, newColumnTitle, token);
       setNewColumnTitle("");
-      refetch();
+      queryClient.invalidateQueries({ queryKey: ["board", boardId] });
+      toast.success("Column created");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to create column");
     } finally {
       setIsCreatingColumn(false);
     }
@@ -63,9 +70,10 @@ export function BoardView({ boardId, boardTitle, onBack }: BoardViewProps) {
 
     try {
       await createTask(boardId, title, columnId, "", token);
-      refetch();
+      queryClient.invalidateQueries({ queryKey: ["board", boardId] });
+      toast.success("Task created");
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to create task");
+      toast.error(err instanceof Error ? err.message : "Failed to create task");
     }
   };
 
@@ -74,21 +82,24 @@ export function BoardView({ boardId, boardTitle, onBack }: BoardViewProps) {
 
     try {
       await updateTask(taskId, { columnId: newColumnId, position }, token);
-      refetch();
+      queryClient.invalidateQueries({ queryKey: ["board", boardId] });
+      toast.success("Task moved");
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to move task");
+      toast.error(err instanceof Error ? err.message : "Failed to move task");
     }
   };
 
   const handleDeleteTask = async (taskId: string) => {
     if (!token) return;
-    if (!window.confirm("Are you sure you want to delete this task?")) return;
+    const confirmed = window.confirm("Are you sure you want to delete this task?");
+    if (!confirmed) return;
 
     try {
       await deleteTask(taskId, token);
-      refetch();
+      queryClient.invalidateQueries({ queryKey: ["board", boardId] });
+      toast.success("Task deleted");
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to delete task");
+      toast.error(err instanceof Error ? err.message : "Failed to delete task");
     }
   };
 
@@ -109,7 +120,7 @@ export function BoardView({ boardId, boardTitle, onBack }: BoardViewProps) {
 
       <main style={styles.main}>
         {isLoading ? (
-          <p>Loading board...</p>
+          <Spinner />
         ) : (
           <div style={styles.boardContainer}>
             {columns.map((column) => (
@@ -120,6 +131,9 @@ export function BoardView({ boardId, boardTitle, onBack }: BoardViewProps) {
                 onSelectTask={(taskId) => setSelectedTaskId(taskId)}
                 onMoveTask={handleMoveTask}
                 onDeleteTask={handleDeleteTask}
+                draggedTaskData={draggedTaskData}
+                onDragStart={(taskId) => setDraggedTaskData({ taskId, sourceColumnId: column.id })}
+                onDragEnd={() => setDraggedTaskData(null)}
               />
             ))}
 

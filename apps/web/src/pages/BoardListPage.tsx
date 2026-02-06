@@ -1,16 +1,19 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import { getBoards, createBoard, deleteBoard } from "../lib/api";
 import { BoardView } from "../components/BoardView";
+import { Spinner } from "../components/Spinner";
 
 export function BoardListPage() {
   const { user, token, logout } = useAuth();
+  const queryClient = useQueryClient();
   const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null);
   const [newBoardTitle, setNewBoardTitle] = useState("");
   const [isCreating, setIsCreating] = useState(false);
 
-  const { data: boardsData, isLoading, refetch } = useQuery({
+  const { data: boardsData, isLoading } = useQuery({
     queryKey: ["boards"],
     queryFn: async () => {
       if (!token) throw new Error("No token");
@@ -31,7 +34,10 @@ export function BoardListPage() {
     try {
       await createBoard(newBoardTitle, token);
       setNewBoardTitle("");
-      refetch();
+      queryClient.invalidateQueries({ queryKey: ["boards"] });
+      toast.success("Board created");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to create board");
     } finally {
       setIsCreating(false);
     }
@@ -39,16 +45,18 @@ export function BoardListPage() {
 
   const handleDeleteBoard = async (boardId: string) => {
     if (!token) return;
-    if (!window.confirm("Are you sure you want to delete this board?")) return;
+    const confirmed = window.confirm("Are you sure you want to delete this board?");
+    if (!confirmed) return;
 
     try {
       await deleteBoard(boardId, token);
       if (selectedBoardId === boardId) {
         setSelectedBoardId(null);
       }
-      refetch();
+      queryClient.invalidateQueries({ queryKey: ["boards"] });
+      toast.success("Board deleted");
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to delete board");
+      toast.error(err instanceof Error ? err.message : "Failed to delete board");
     }
   };
 
@@ -103,7 +111,7 @@ export function BoardListPage() {
         <section style={styles.section}>
           <h2 style={styles.sectionTitle}>Your Boards</h2>
           {isLoading ? (
-            <p>Loading boards...</p>
+            <Spinner />
           ) : boards.length === 0 ? (
             <p style={styles.emptyState}>No boards yet. Create one to get started!</p>
           ) : (
