@@ -126,7 +126,7 @@ export function TaskDetailModal({ task, boardId, onClose, onRefresh }: TaskDetai
                 if (e.key === "Enter") {
                   handleSaveTitle();
                 } else if (e.key === "Escape") {
-                  setEditedTitle(task.title);
+                  setEditedTitle(currentTask.title);
                   setIsEditingTitle(false);
                 }
               }}
@@ -135,7 +135,10 @@ export function TaskDetailModal({ task, boardId, onClose, onRefresh }: TaskDetai
           ) : (
             <h2
               className="mb-md text-xl font-semibold cursor-pointer"
-              onDoubleClick={() => setIsEditingTitle(true)}
+              onDoubleClick={() => {
+                setEditedTitle(currentTask.title);
+                setIsEditingTitle(true);
+              }}
               title="Double-click to edit"
             >
               {currentTask.title}
@@ -152,7 +155,7 @@ export function TaskDetailModal({ task, boardId, onClose, onRefresh }: TaskDetai
                 onBlur={handleSaveDescription}
                 onKeyDown={(e) => {
                   if (e.key === "Escape") {
-                    setEditedDescription(task.description || "");
+                    setEditedDescription(currentTask.description || "");
                     setIsEditingDescription(false);
                   }
                 }}
@@ -161,7 +164,10 @@ export function TaskDetailModal({ task, boardId, onClose, onRefresh }: TaskDetai
             ) : (
               <p
                 className="m-0 text-sm text-gray-600 leading-relaxed cursor-pointer bg-gray-50 p-xs rounded-md"
-                onClick={() => setIsEditingDescription(true)}
+                onClick={() => {
+                  setEditedDescription(currentTask.description || "");
+                  setIsEditingDescription(true);
+                }}
                 title="Click to edit"
               >
                 {currentTask.description || "(No description)"}
