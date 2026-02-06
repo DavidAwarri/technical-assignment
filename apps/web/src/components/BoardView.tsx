@@ -36,7 +36,7 @@ export function BoardView({ boardId, boardTitle, onBack }: BoardViewProps) {
   const [isCreatingColumn, setIsCreatingColumn] = useState(false);
   const [draggedTaskData, setDraggedTaskData] = useState<{ taskId: string; sourceColumnId: string } | null>(null);
 
-  const { data: boardData, isLoading } = useQuery({
+  const { data: boardData, isLoading, refetch } = useQuery({
     queryKey: ["board", boardId],
     queryFn: async () => {
       if (!token) throw new Error("No token");
