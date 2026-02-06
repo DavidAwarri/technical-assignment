@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { FiArrowLeft, FiPlus } from "react-icons/fi";
 import { useAuth } from "../context/AuthContext";
 import {
   getBoard,
@@ -245,7 +246,7 @@ export function BoardViewModern({ boardId, boardTitle, onBack }: BoardViewProps)
             onMouseOver={(e) => (e.currentTarget.style.color = colors.primaryLight)}
             onMouseOut={(e) => (e.currentTarget.style.color = colors.primary)}
           >
-            ←
+            <FiArrowLeft size={20} />
           </button>
           <h1 style={{ margin: 0, color: colors.textPrimary }}>{boardTitle}</h1>
         </div>
@@ -289,11 +290,16 @@ export function BoardViewModern({ boardId, boardTitle, onBack }: BoardViewProps)
               style={{
                 ...styles.addColumnButton,
                 opacity: isCreatingColumn ? 0.6 : 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: spacing.sm,
               }}
               onMouseOver={(e) => !isCreatingColumn && (e.currentTarget.style.backgroundColor = colors.primaryDark)}
               onMouseOut={(e) => (e.currentTarget.style.backgroundColor = colors.primary)}
             >
-              {isCreatingColumn ? "+" : "+"}
+              <FiPlus size={16} />
+              {isCreatingColumn ? "Adding..." : "Add"}
             </button>
           </form>
         </div>

@@ -59,6 +59,31 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Auth pages (Login/Register) use white background */
+body.auth-page {
+  background-color: #ffffff;
+  color: #1f2937;
+}
+
+body.auth-page input, 
+body.auth-page textarea, 
+body.auth-page select {
+  background-color: #f3f4f6;
+  color: #1f2937;
+  border-color: #d1d5db;
+}
+
+body.auth-page input:focus, 
+body.auth-page textarea:focus, 
+body.auth-page select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Board pages use dark background */
+body.board-page {
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
 }
@@ -141,4 +166,97 @@ input::placeholder {
 
 .animate-slideInUp {
   animation: slideInUp 0.3s ease-in-out;
+}
+
+/* Board Container - Horizontal Scrolling */
+.board-container {
+  display: flex;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  overflow-x: auto;
+  overflow-y: hidden;
+  align-items: flex-start;
+}
+
+.board-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.board-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.board-container::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.board-container::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* Column Styles */
+.column {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: calc(100vh - 200px);
+  width: 360px;
+  min-width: 360px;
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.column-header {
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.column-tasks {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.column-tasks::-webkit-scrollbar {
+  width: 6px;
+}
+
+.column-tasks::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.column-tasks::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.column-tasks::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* Task Card */
+.task-card {
+  padding: var(--spacing-md);
+  background-color: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: grab;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.task-card:hover {
+  background-color: var(--color-bg-primary);
+  border-color: var(--color-primary);
+}
+
+.task-card.dragging {
+  opacity: 0.5;
 }

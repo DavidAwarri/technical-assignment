@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { 
+  FiLogOut, 
+  FiPlus, 
+  FiEdit2, 
+  FiTrash2, 
+  FiColumns, 
+  FiCheckSquare 
+} from "react-icons/fi";
 import { useAuth } from "../context/AuthContext";
 import { getBoards, createBoard, deleteBoard, updateBoard } from "../lib/api";
 import { BoardView } from "../components/BoardView";
@@ -11,6 +19,7 @@ import { colors, spacing, radius, shadows } from "../lib/styles";
 interface Board {
   id: string;
   title: string;
+  columns?: any[];
 }
 
 export function BoardListPage() {
@@ -118,6 +127,9 @@ export function BoardListPage() {
       fontWeight: 700,
       color: colors.primary,
       margin: 0,
+      display: "flex",
+      alignItems: "center",
+      gap: spacing.sm,
     },
     userInfo: {
       display: "flex",
@@ -129,15 +141,18 @@ export function BoardListPage() {
       color: colors.textSecondary,
     },
     logoutButton: {
-      padding: `${spacing.xs} ${spacing.md}`,
+      padding: `${spacing.sm} ${spacing.md}`,
       backgroundColor: colors.danger,
-      color: colors.textPrimary,
+      color: "white",
       border: "none",
       borderRadius: radius.md,
       cursor: "pointer",
       fontWeight: 500,
       fontSize: "14px",
       transition: `all 0.2s`,
+      display: "flex",
+      alignItems: "center",
+      gap: spacing.sm,
     },
     main: {
       flex: 1,
@@ -152,37 +167,43 @@ export function BoardListPage() {
       fontWeight: 600,
       color: colors.textPrimary,
       marginBottom: spacing.lg,
+      display: "flex",
+      alignItems: "center",
+      gap: spacing.md,
     },
-    createBoardForm: {
+    createForm: {
       display: "flex",
       gap: spacing.md,
       marginBottom: spacing.xl,
       maxWidth: "500px",
     },
-    createBoardInput: {
+    formInput: {
       flex: 1,
       padding: `${spacing.sm} ${spacing.md}`,
       backgroundColor: colors.bgSecondary,
+      color: colors.textPrimary,
       border: `1px solid ${colors.border}`,
       borderRadius: radius.md,
-      color: colors.textPrimary,
       fontSize: "14px",
       transition: `all 0.2s`,
     },
-    createBoardButton: {
-      padding: `${spacing.sm} ${spacing.md}`,
+    createButton: {
+      padding: `${spacing.sm} ${spacing.lg}`,
       backgroundColor: colors.primary,
-      color: colors.textPrimary,
+      color: "white",
       border: "none",
       borderRadius: radius.md,
       cursor: "pointer",
       fontWeight: 500,
       fontSize: "14px",
+      display: "flex",
+      alignItems: "center",
+      gap: spacing.sm,
       transition: `all 0.2s`,
     },
     boardsGrid: {
       display: "grid",
-      gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
+      gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
       gap: spacing.lg,
     },
     boardCard: {
@@ -191,44 +212,50 @@ export function BoardListPage() {
       borderRadius: radius.lg,
       padding: spacing.lg,
       cursor: "pointer",
-      transition: `all 0.3s`,
+      transition: `all 0.2s`,
       display: "flex",
       flexDirection: "column" as const,
       gap: spacing.md,
     },
     boardTitle: {
-      fontSize: "18px",
+      fontSize: "16px",
       fontWeight: 600,
       color: colors.textPrimary,
       margin: 0,
     },
-    boardActions: {
+    boardStats: {
       display: "flex",
       gap: spacing.md,
+      fontSize: "13px",
+      color: colors.textSecondary,
     },
-    actionButton: {
-      flex: 1,
-      padding: `${spacing.xs} ${spacing.md}`,
+    statItem: {
+      display: "flex",
+      alignItems: "center",
+      gap: spacing.xs,
+    },
+    boardActions: {
+      display: "flex",
+      gap: spacing.sm,
+      justifyContent: "flex-end",
+      paddingTop: spacing.md,
+      borderTop: `1px solid ${colors.border}`,
+    },
+    iconButton: {
+      padding: spacing.xs,
+      backgroundColor: "transparent",
+      color: colors.textSecondary,
       border: "none",
       borderRadius: radius.md,
       cursor: "pointer",
-      fontWeight: 500,
-      fontSize: "13px",
+      fontSize: "16px",
       transition: `all 0.2s`,
     },
-    openButton: {
-      backgroundColor: colors.primary,
-      color: colors.textPrimary,
+    deleteButton: {
+      color: colors.danger,
     },
     editButton: {
-      backgroundColor: colors.bgTertiary,
       color: colors.primary,
-      border: `1px solid ${colors.primary}`,
-    },
-    deleteButton: {
-      backgroundColor: colors.bgTertiary,
-      color: colors.danger,
-      border: `1px solid ${colors.danger}`,
     },
     emptyState: {
       textAlign: "center" as const,
@@ -241,20 +268,38 @@ export function BoardListPage() {
     },
   };
 
+  const handleBoardClick = (boardId: string) => {
+    setSelectedBoardId(boardId);
+  };
+
+  const calculateBoardStats = (board: Board) => {
+    const columns = board.columns || [];
+    const tasks = columns.reduce((sum, col) => sum + (col.tasks?.length || 0), 0);
+    return { columns: columns.length, tasks };
+  };
+
   return (
     <div style={styles.container}>
       <header style={styles.header}>
         <div style={styles.headerLeft}>
-          <h1 style={styles.logo}>📋 Team Boards</h1>
+          <h1 style={styles.logo}>
+            <FiColumns size={28} />
+            Team Boards
+          </h1>
         </div>
         <div style={styles.userInfo}>
           <span style={styles.userName}>{user?.name}</span>
           <button
-            onClick={logout}
             style={styles.logoutButton}
-            onMouseOver={(e) => (e.currentTarget.style.opacity = "0.9")}
-            onMouseOut={(e) => (e.currentTarget.style.opacity = "1")}
+            onClick={logout}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#dc2626";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.backgroundColor = colors.danger;
+            }}
           >
+            <FiLogOut size={16} />
             Logout
           </button>
         </div>
@@ -262,35 +307,51 @@ export function BoardListPage() {
 
       <main style={styles.main}>
         <section style={styles.section}>
-          <h2 style={styles.sectionTitle}>Create New Board</h2>
-          <form onSubmit={handleCreateBoard} style={styles.createBoardForm}>
+          <h2 style={styles.sectionTitle}>
+            <FiPlus size={20} />
+            Create New Board
+          </h2>
+          <form onSubmit={handleCreateBoard} style={styles.createForm}>
             <input
               type="text"
-              placeholder="Board name..."
               value={newBoardTitle}
               onChange={(e) => setNewBoardTitle(e.target.value)}
-              style={styles.createBoardInput}
+              placeholder="Enter board name..."
+              style={styles.formInput}
+              onFocus={(e) => {
+                (e.currentTarget as HTMLInputElement).style.borderColor = colors.primary;
+                (e.currentTarget as HTMLInputElement).style.boxShadow = `0 0 0 3px rgba(59, 130, 246, 0.1)`;
+              }}
+              onBlur={(e) => {
+                (e.currentTarget as HTMLInputElement).style.borderColor = colors.border;
+                (e.currentTarget as HTMLInputElement).style.boxShadow = "none";
+              }}
               disabled={isCreating}
-              onFocus={(e) => (e.currentTarget.style.borderColor = colors.primary)}
-              onBlur={(e) => (e.currentTarget.style.borderColor = colors.border)}
             />
             <button
               type="submit"
-              disabled={isCreating || !newBoardTitle.trim()}
-              style={{
-                ...styles.createBoardButton,
-                opacity: isCreating || !newBoardTitle.trim() ? 0.6 : 1,
+              style={styles.createButton}
+              disabled={isCreating}
+              onMouseEnter={(e) => {
+                if (!isCreating) {
+                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = colors.primaryDark;
+                }
               }}
-              onMouseOver={(e) => !isCreating && (e.currentTarget.style.backgroundColor = colors.primaryDark)}
-              onMouseOut={(e) => (e.currentTarget.style.backgroundColor = colors.primary)}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.backgroundColor = colors.primary;
+              }}
             >
-              Create Board
+              {isCreating ? "Creating..." : "Create"}
             </button>
           </form>
         </section>
 
         <section style={styles.section}>
-          <h2 style={styles.sectionTitle}>Your Boards</h2>
+          <h2 style={styles.sectionTitle}>
+            <FiColumns size={20} />
+            Your Boards
+          </h2>
+
           {isLoading ? (
             <Spinner />
           ) : boards.length === 0 ? (
@@ -300,85 +361,119 @@ export function BoardListPage() {
             </div>
           ) : (
             <div style={styles.boardsGrid}>
-              {boards.map((board) => (
-                <div
-                  key={board.id}
-                  style={styles.boardCard}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.borderColor = colors.primary;
-                    e.currentTarget.style.boxShadow = shadows.lg;
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.borderColor = colors.border;
-                    e.currentTarget.style.boxShadow = shadows.md;
-                  }}
-                >
-                  {editingBoardId === board.id ? (
-                    <input
-                      autoFocus
-                      type="text"
-                      value={editingBoardTitle}
-                      onChange={(e) => setEditingBoardTitle(e.target.value)}
-                      onBlur={() => handleEditBoard(board.id, editingBoardTitle)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleEditBoard(board.id, editingBoardTitle);
-                        if (e.key === "Escape") setEditingBoardId(null);
-                      }}
-                      style={{
-                        ...styles.createBoardInput,
-                        fontSize: "18px",
-                      }}
-                    />
-                  ) : (
-                    <h3 style={styles.boardTitle}>{board.title}</h3>
-                  )}
+              {boards.map((board) => {
+                const stats = calculateBoardStats(board);
+                const isEditing = editingBoardId === board.id;
 
-                  <div style={styles.boardActions}>
-                    <button
-                      onClick={() => setSelectedBoardId(board.id)}
-                      style={{ ...styles.actionButton, ...styles.openButton }}
-                      onMouseOver={(e) => (e.currentTarget.style.backgroundColor = colors.primaryDark)}
-                      onMouseOut={(e) => (e.currentTarget.style.backgroundColor = colors.primary)}
-                    >
-                      Open
-                    </button>
-                    <button
-                      onClick={() => {
-                        setEditingBoardId(board.id);
-                        setEditingBoardTitle(board.title);
-                      }}
-                      style={{ ...styles.actionButton, ...styles.editButton }}
-                      onMouseOver={(e) => (e.currentTarget.style.backgroundColor = colors.primary)}
-                      onMouseOut={(e) => (e.currentTarget.style.backgroundColor = colors.bgTertiary)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => setDeleteConfirmId(board.id)}
-                      style={{ ...styles.actionButton, ...styles.deleteButton }}
-                      onMouseOver={(e) => (e.currentTarget.style.backgroundColor = colors.danger)}
-                      onMouseOut={(e) => (e.currentTarget.style.backgroundColor = colors.bgTertiary)}
-                    >
-                      Delete
-                    </button>
+                return (
+                  <div
+                    key={board.id}
+                    style={styles.boardCard}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLDivElement).style.borderColor = colors.primary;
+                      (e.currentTarget as HTMLDivElement).style.boxShadow = shadows.lg;
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLDivElement).style.borderColor = colors.border;
+                      (e.currentTarget as HTMLDivElement).style.boxShadow = "none";
+                    }}
+                  >
+                    {isEditing ? (
+                      <input
+                        autoFocus
+                        type="text"
+                        value={editingBoardTitle}
+                        onChange={(e) => setEditingBoardTitle(e.target.value)}
+                        style={styles.formInput}
+                        onBlur={() => {
+                          if (editingBoardTitle.trim()) {
+                            handleEditBoard(board.id, editingBoardTitle);
+                          }
+                          setEditingBoardId(null);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            if (editingBoardTitle.trim()) {
+                              handleEditBoard(board.id, editingBoardTitle);
+                            }
+                            setEditingBoardId(null);
+                          } else if (e.key === "Escape") {
+                            setEditingBoardId(null);
+                          }
+                        }}
+                      />
+                    ) : (
+                      <>
+                        <h3
+                          style={styles.boardTitle}
+                          onClick={() => handleBoardClick(board.id)}
+                        >
+                          {board.title}
+                        </h3>
+                        <div style={styles.boardStats}>
+                          <div style={styles.statItem}>
+                            <FiColumns size={14} />
+                            {stats.columns} column{stats.columns !== 1 ? "s" : ""}
+                          </div>
+                          <div style={styles.statItem}>
+                            <FiCheckSquare size={14} />
+                            {stats.tasks} task{stats.tasks !== 1 ? "s" : ""}
+                          </div>
+                        </div>
+                        <div style={styles.boardActions}>
+                          <button
+                            style={{ ...styles.iconButton, ...styles.editButton }}
+                            onClick={() => {
+                              setEditingBoardId(board.id);
+                              setEditingBoardTitle(board.title);
+                            }}
+                            onMouseEnter={(e) => {
+                              (e.currentTarget as HTMLButtonElement).style.backgroundColor = colors.bgTertiary;
+                            }}
+                            onMouseLeave={(e) => {
+                              (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent";
+                            }}
+                          >
+                            <FiEdit2 size={16} />
+                          </button>
+                          <button
+                            style={{ ...styles.iconButton, ...styles.deleteButton }}
+                            onClick={() => {
+                              setDeleteConfirmId(board.id);
+                            }}
+                            onMouseEnter={(e) => {
+                              (e.currentTarget as HTMLButtonElement).style.backgroundColor = colors.bgTertiary;
+                            }}
+                            onMouseLeave={(e) => {
+                              (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent";
+                            }}
+                          >
+                            <FiTrash2 size={16} />
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </section>
       </main>
 
-      <ConfirmModal
-        isOpen={!!deleteConfirmId}
-        title="Delete Board"
-        message="Are you sure you want to delete this board? This action cannot be undone."
-        confirmText="Delete"
-        cancelText="Cancel"
-        isDangerous
-        onConfirm={() => deleteConfirmId && handleDeleteBoard(deleteConfirmId)}
-        onCancel={() => setDeleteConfirmId(null)}
-      />
+      {deleteConfirmId && (
+        <ConfirmModal
+          title="Delete Board"
+          message="Are you sure you want to delete this board? This action cannot be undone."
+          confirmText="Delete"
+          cancelText="Cancel"
+          isDangerous={true}
+          onConfirm={() => {
+            handleDeleteBoard(deleteConfirmId);
+          }}
+          onCancel={() => setDeleteConfirmId(null)}
+        />
+      )}
     </div>
   );
 }
