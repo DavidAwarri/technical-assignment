@@ -58,7 +58,8 @@ export function TaskDetailModal({ task, boardId, onClose, onRefresh }: TaskDetai
   };
 
   const handleSaveTitle = async () => {
-    if (!token || editedTitle === task.title) {
+    if (!token || editedTitle === task.title || !editedTitle.trim()) {
+      setEditedTitle(task.title);
       setIsEditingTitle(false);
       return;
     }
@@ -71,6 +72,8 @@ export function TaskDetailModal({ task, boardId, onClose, onRefresh }: TaskDetai
       toast.success("Title updated");
       onRefresh();
     } catch (err) {
+      setEditedTitle(task.title);
+      setIsEditingTitle(false);
       toast.error(err instanceof Error ? err.message : "Failed to update task");
     }
   };
@@ -89,6 +92,8 @@ export function TaskDetailModal({ task, boardId, onClose, onRefresh }: TaskDetai
       toast.success("Description updated");
       onRefresh();
     } catch (err) {
+      setEditedDescription(task.description || "");
+      setIsEditingDescription(false);
       toast.error(err instanceof Error ? err.message : "Failed to update task");
     }
   };
@@ -111,37 +116,27 @@ export function TaskDetailModal({ task, boardId, onClose, onRefresh }: TaskDetai
 
         <div className="p-lg">
           {isEditingTitle ? (
-            <div className="flex flex-col gap-xs">
-              <input
-                autoFocus
-                type="text"
-                value={editedTitle}
-                onChange={(e) => setEditedTitle(e.target.value)}
-                className="px-sm py-xs text-sm border border-gray-300 rounded-md font-inherit"
-              />
-              <div className="flex gap-xs">
-                <button
-                  onClick={handleSaveTitle}
-                  className="flex-1 px-sm py-xs text-xs font-semibold text-white bg-green-600 border-none rounded cursor-pointer"
-                >
-                  Save
-                </button>
-                <button
-                  onClick={() => {
-                    setEditedTitle(task.title);
-                    setIsEditingTitle(false);
-                  }}
-                  className="flex-1 px-sm py-xs text-xs font-semibold text-white bg-gray-600 border-none rounded cursor-pointer"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
+            <input
+              autoFocus
+              type="text"
+              value={editedTitle}
+              onChange={(e) => setEditedTitle(e.target.value)}
+              onBlur={handleSaveTitle}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSaveTitle();
+                } else if (e.key === "Escape") {
+                  setEditedTitle(task.title);
+                  setIsEditingTitle(false);
+                }
+              }}
+              className="mb-md w-full px-sm py-xs text-xl font-semibold border border-gray-300 rounded-md font-inherit"
+            />
           ) : (
             <h2
               className="mb-md text-xl font-semibold cursor-pointer"
-              onClick={() => setIsEditingTitle(true)}
-              title="Click to edit"
+              onDoubleClick={() => setIsEditingTitle(true)}
+              title="Double-click to edit"
             >
               {currentTask.title}
             </h2>
@@ -150,31 +145,19 @@ export function TaskDetailModal({ task, boardId, onClose, onRefresh }: TaskDetai
           <section className="mb-lg">
             <h3 className="mb-xs text-sm font-semibold text-gray-900">Description</h3>
             {isEditingDescription ? (
-              <div className="flex flex-col gap-xs">
-                <textarea
-                  autoFocus
-                  value={editedDescription}
-                  onChange={(e) => setEditedDescription(e.target.value)}
-                  className="px-sm py-xs text-sm border border-gray-300 rounded-md font-inherit min-h-[80px]"
-                />
-                <div className="flex gap-xs">
-                  <button
-                    onClick={handleSaveDescription}
-                    className="flex-1 px-sm py-xs text-xs font-semibold text-white bg-green-600 border-none rounded cursor-pointer"
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={() => {
-                      setEditedDescription(task.description || "");
-                      setIsEditingDescription(false);
-                    }}
-                    className="flex-1 px-sm py-xs text-xs font-semibold text-white bg-gray-600 border-none rounded cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
+              <textarea
+                autoFocus
+                value={editedDescription}
+                onChange={(e) => setEditedDescription(e.target.value)}
+                onBlur={handleSaveDescription}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") {
+                    setEditedDescription(task.description || "");
+                    setIsEditingDescription(false);
+                  }
+                }}
+                className="w-full px-sm py-xs text-sm border border-gray-300 rounded-md font-inherit min-h-[80px]"
+              />
             ) : (
               <p
                 className="m-0 text-sm text-gray-600 leading-relaxed cursor-pointer bg-gray-50 p-xs rounded-md"
