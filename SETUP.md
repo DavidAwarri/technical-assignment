@@ -14,7 +14,24 @@
    pnpm install
    ```
 
-2. **Initialize database:**
+2. **Create `.env` file for the API:**
+   The `.env` file is required for database configuration. Create it by copying the template:
+   ```bash
+   # Windows (PowerShell)
+   copy apps/api/.env.example apps/api/.env
+   
+   # Mac/Linux
+   cp apps/api/.env.example apps/api/.env
+   ```
+   
+   The file should contain:
+   ```
+   DATABASE_URL="file:./dev.db"
+   JWT_SECRET="dev-secret-key-change-in-production"
+   PORT=4000
+   ```
+
+3. **Initialize database:**
    ```bash
    # Run migrations to create schema
    pnpm -C apps/api db:migrate
@@ -105,6 +122,21 @@ pnpm -C apps/api db:reset    # Reset database completely
 ```
 
 ## Troubleshooting
+
+### "Environment variable not found: DATABASE_URL" error
+This means the `.env` file is missing or not in the right location. Fix it:
+```bash
+# Make sure you're in the project root, then:
+copy apps/api/.env.example apps/api/.env  # Windows
+cp apps/api/.env.example apps/api/.env     # Mac/Linux
+
+# Verify the .env file exists
+ls apps/api/.env       # Mac/Linux
+dir apps/api\.env      # Windows
+
+# Then try migrations again
+pnpm -C apps/api db:migrate
+```
 
 ### "Cannot find module" errors
 ```bash
