@@ -1,3 +1,6 @@
+'use client';
+
+import React from "react"
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -14,7 +17,148 @@ import { getBoards, createBoard, deleteBoard, updateBoard } from "../lib/api";
 import { BoardView } from "../components/BoardView";
 import { Spinner } from "../components/Spinner";
 import { ConfirmModal } from "../components/ConfirmModal";
-import { colors, spacing, radius, shadows } from "../lib/styles";
+import { colors, spacing, radius, shadows } from "../styles/theme";
+
+const styles = {
+  container: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    padding: spacing.md,
+  },
+  header: {
+    width: "100%",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: spacing.lg,
+  },
+  headerLeft: {
+    display: "flex",
+    alignItems: "center",
+  },
+  logo: {
+    display: "flex",
+    alignItems: "center",
+    fontSize: 24,
+    fontWeight: "bold",
+    color: colors.textPrimary,
+  },
+  userInfo: {
+    display: "flex",
+    alignItems: "center",
+  },
+  userName: {
+    marginRight: spacing.sm,
+    fontSize: 16,
+    color: colors.textPrimary,
+  },
+  logoutButton: {
+    backgroundColor: colors.danger,
+    color: colors.textWhite,
+    border: "none",
+    borderRadius: radius.md,
+    padding: spacing.sm,
+    cursor: "pointer",
+    transition: "background-color 0.3s",
+  },
+  main: {
+    width: "100%",
+    maxWidth: 800,
+  },
+  section: {
+    width: "100%",
+    marginBottom: spacing.lg,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: colors.textPrimary,
+    display: "flex",
+    alignItems: "center",
+  },
+  createForm: {
+    display: "flex",
+    flexDirection: "column",
+    gap: spacing.sm,
+  },
+  formInput: {
+    padding: spacing.sm,
+    border: `1px solid ${colors.border}`,
+    borderRadius: radius.md,
+    fontSize: 16,
+    transition: "border-color 0.3s, box-shadow 0.3s",
+  },
+  createButton: {
+    backgroundColor: colors.primary,
+    color: colors.textWhite,
+    border: "none",
+    borderRadius: radius.md,
+    padding: spacing.sm,
+    cursor: "pointer",
+    transition: "background-color 0.3s",
+  },
+  emptyState: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    height: 200,
+    fontSize: 16,
+    color: colors.textSecondary,
+  },
+  emptyIcon: {
+    fontSize: 48,
+    marginBottom: spacing.sm,
+  },
+  boardsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+    gap: spacing.md,
+  },
+  boardCard: {
+    border: `1px solid ${colors.border}`,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    transition: "border-color 0.3s, box-shadow 0.3s",
+  },
+  boardTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: colors.textPrimary,
+    cursor: "pointer",
+  },
+  boardStats: {
+    display: "flex",
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+  },
+  statItem: {
+    display: "flex",
+    alignItems: "center",
+    fontSize: 14,
+    color: colors.textSecondary,
+  },
+  boardActions: {
+    display: "flex",
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+  },
+  iconButton: {
+    backgroundColor: "transparent",
+    border: "none",
+    borderRadius: radius.md,
+    padding: spacing.sm,
+    cursor: "pointer",
+    transition: "background-color 0.3s",
+  },
+  editButton: {
+    backgroundColor: colors.bgTertiary,
+  },
+  deleteButton: {
+    backgroundColor: colors.bgTertiary,
+  },
+};
 
 interface Board {
   id: string;
@@ -102,172 +246,6 @@ export function BoardListPage() {
     );
   }
 
-  const styles = {
-    container: {
-      minHeight: "100vh",
-      backgroundColor: colors.bgPrimary,
-      display: "flex",
-      flexDirection: "column" as const,
-    },
-    header: {
-      backgroundColor: colors.bgSecondary,
-      borderBottom: `1px solid ${colors.border}`,
-      padding: spacing.lg,
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-    },
-    headerLeft: {
-      display: "flex",
-      alignItems: "center",
-      gap: spacing.md,
-    },
-    logo: {
-      fontSize: "24px",
-      fontWeight: 700,
-      color: colors.primary,
-      margin: 0,
-      display: "flex",
-      alignItems: "center",
-      gap: spacing.sm,
-    },
-    userInfo: {
-      display: "flex",
-      alignItems: "center",
-      gap: spacing.md,
-    },
-    userName: {
-      fontSize: "14px",
-      color: colors.textSecondary,
-    },
-    logoutButton: {
-      padding: `${spacing.sm} ${spacing.md}`,
-      backgroundColor: colors.danger,
-      color: "white",
-      border: "none",
-      borderRadius: radius.md,
-      cursor: "pointer",
-      fontWeight: 500,
-      fontSize: "14px",
-      transition: `all 0.2s`,
-      display: "flex",
-      alignItems: "center",
-      gap: spacing.sm,
-    },
-    main: {
-      flex: 1,
-      padding: spacing.xl,
-      overflow: "auto",
-    },
-    section: {
-      marginBottom: spacing.xl,
-    },
-    sectionTitle: {
-      fontSize: "20px",
-      fontWeight: 600,
-      color: colors.textPrimary,
-      marginBottom: spacing.lg,
-      display: "flex",
-      alignItems: "center",
-      gap: spacing.md,
-    },
-    createForm: {
-      display: "flex",
-      gap: spacing.md,
-      marginBottom: spacing.xl,
-      maxWidth: "500px",
-    },
-    formInput: {
-      flex: 1,
-      padding: `${spacing.sm} ${spacing.md}`,
-      backgroundColor: colors.bgSecondary,
-      color: colors.textPrimary,
-      border: `1px solid ${colors.border}`,
-      borderRadius: radius.md,
-      fontSize: "14px",
-      transition: `all 0.2s`,
-    },
-    createButton: {
-      padding: `${spacing.sm} ${spacing.lg}`,
-      backgroundColor: colors.primary,
-      color: "white",
-      border: "none",
-      borderRadius: radius.md,
-      cursor: "pointer",
-      fontWeight: 500,
-      fontSize: "14px",
-      display: "flex",
-      alignItems: "center",
-      gap: spacing.sm,
-      transition: `all 0.2s`,
-    },
-    boardsGrid: {
-      display: "grid",
-      gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-      gap: spacing.lg,
-    },
-    boardCard: {
-      backgroundColor: colors.bgSecondary,
-      border: `1px solid ${colors.border}`,
-      borderRadius: radius.lg,
-      padding: spacing.lg,
-      cursor: "pointer",
-      transition: `all 0.2s`,
-      display: "flex",
-      flexDirection: "column" as const,
-      gap: spacing.md,
-    },
-    boardTitle: {
-      fontSize: "16px",
-      fontWeight: 600,
-      color: colors.textPrimary,
-      margin: 0,
-    },
-    boardStats: {
-      display: "flex",
-      gap: spacing.md,
-      fontSize: "13px",
-      color: colors.textSecondary,
-    },
-    statItem: {
-      display: "flex",
-      alignItems: "center",
-      gap: spacing.xs,
-    },
-    boardActions: {
-      display: "flex",
-      gap: spacing.sm,
-      justifyContent: "flex-end",
-      paddingTop: spacing.md,
-      borderTop: `1px solid ${colors.border}`,
-    },
-    iconButton: {
-      padding: spacing.xs,
-      backgroundColor: "transparent",
-      color: colors.textSecondary,
-      border: "none",
-      borderRadius: radius.md,
-      cursor: "pointer",
-      fontSize: "16px",
-      transition: `all 0.2s`,
-    },
-    deleteButton: {
-      color: colors.danger,
-    },
-    editButton: {
-      color: colors.primary,
-    },
-    emptyState: {
-      textAlign: "center" as const,
-      padding: spacing.xl,
-      color: colors.textMuted,
-    },
-    emptyIcon: {
-      fontSize: "48px",
-      marginBottom: spacing.md,
-    },
-  };
-
   const handleBoardClick = (boardId: string) => {
     setSelectedBoardId(boardId);
   };
@@ -279,25 +257,19 @@ export function BoardListPage() {
   };
 
   return (
-    <div style={styles.container}>
-      <header style={styles.header}>
-        <div style={styles.headerLeft}>
-          <h1 style={styles.logo}>
+    <div className="min-h-screen bg-bg-primary flex flex-col">
+      <header className="bg-bg-secondary border-b border-border p-lg flex justify-between items-center">
+        <div className="flex items-center gap-md">
+          <h1 className="text-2xl font-bold text-primary m-0 flex items-center gap-sm">
             <FiColumns size={28} />
             Team Boards
           </h1>
         </div>
-        <div style={styles.userInfo}>
-          <span style={styles.userName}>{user?.name}</span>
+        <div className="flex items-center gap-md">
+          <span className="text-sm text-text-secondary">{user?.name}</span>
           <button
-            style={styles.logoutButton}
             onClick={logout}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#dc2626";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.backgroundColor = colors.danger;
-            }}
+            className="px-md py-sm bg-danger text-white border-none rounded-md cursor-pointer font-medium text-sm transition-all flex items-center gap-sm hover:bg-red-700"
           >
             <FiLogOut size={16} />
             Logout
@@ -305,49 +277,35 @@ export function BoardListPage() {
         </div>
       </header>
 
-      <main style={styles.main}>
-        <section style={styles.section}>
-          <h2 style={styles.sectionTitle}>
+      <main className="flex-1 p-xl overflow-auto">
+        <section className="mb-xl">
+          <h2 className="text-xl font-semibold text-text-primary mb-lg flex items-center gap-md">
             <FiPlus size={20} />
             Create New Board
           </h2>
-          <form onSubmit={handleCreateBoard} style={styles.createForm}>
+          <form onSubmit={handleCreateBoard} className="flex gap-md mb-xl max-w-md">
             <input
               type="text"
               value={newBoardTitle}
               onChange={(e) => setNewBoardTitle(e.target.value)}
               placeholder="Enter board name..."
-              style={styles.formInput}
-              onFocus={(e) => {
-                (e.currentTarget as HTMLInputElement).style.borderColor = colors.primary;
-                (e.currentTarget as HTMLInputElement).style.boxShadow = `0 0 0 3px rgba(59, 130, 246, 0.1)`;
-              }}
-              onBlur={(e) => {
-                (e.currentTarget as HTMLInputElement).style.borderColor = colors.border;
-                (e.currentTarget as HTMLInputElement).style.boxShadow = "none";
-              }}
               disabled={isCreating}
+              className="flex-1 px-md py-sm bg-bg-secondary text-text-primary border border-border rounded-md text-sm transition-all focus:border-primary"
             />
             <button
               type="submit"
-              style={styles.createButton}
               disabled={isCreating}
-              onMouseEnter={(e) => {
-                if (!isCreating) {
-                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = colors.primaryDark;
-                }
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.backgroundColor = colors.primary;
-              }}
+              className={`px-lg py-sm bg-primary text-white border-none rounded-md cursor-pointer font-medium text-sm flex items-center gap-sm transition-all ${
+                isCreating ? "opacity-60" : "opacity-100 hover:bg-primary-dark"
+              }`}
             >
               {isCreating ? "Creating..." : "Create"}
             </button>
           </form>
         </section>
 
-        <section style={styles.section}>
-          <h2 style={styles.sectionTitle}>
+        <section className="mb-xl">
+          <h2 className="text-xl font-semibold text-text-primary mb-lg flex items-center gap-md">
             <FiColumns size={20} />
             Your Boards
           </h2>
@@ -355,12 +313,12 @@ export function BoardListPage() {
           {isLoading ? (
             <Spinner />
           ) : boards.length === 0 ? (
-            <div style={styles.emptyState}>
-              <div style={styles.emptyIcon}>📭</div>
+            <div className="text-center p-xl text-text-muted">
+              <div className="text-5xl mb-md">📭</div>
               <p>No boards yet. Create one to get started!</p>
             </div>
           ) : (
-            <div style={styles.boardsGrid}>
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-lg">
               {boards.map((board) => {
                 const stats = calculateBoardStats(board);
                 const isEditing = editingBoardId === board.id;
@@ -368,15 +326,7 @@ export function BoardListPage() {
                 return (
                   <div
                     key={board.id}
-                    style={styles.boardCard}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLDivElement).style.borderColor = colors.primary;
-                      (e.currentTarget as HTMLDivElement).style.boxShadow = shadows.lg;
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLDivElement).style.borderColor = colors.border;
-                      (e.currentTarget as HTMLDivElement).style.boxShadow = "none";
-                    }}
+                    className="bg-bg-secondary border border-border rounded-lg p-lg cursor-pointer transition-all flex flex-col gap-md hover:border-primary hover:shadow-lg"
                   >
                     {isEditing ? (
                       <input
@@ -384,7 +334,7 @@ export function BoardListPage() {
                         type="text"
                         value={editingBoardTitle}
                         onChange={(e) => setEditingBoardTitle(e.target.value)}
-                        style={styles.formInput}
+                        className="flex-1 px-md py-sm bg-bg-secondary text-text-primary border border-border rounded-md text-sm transition-all focus:border-primary"
                         onBlur={() => {
                           if (editingBoardTitle.trim()) {
                             handleEditBoard(board.id, editingBoardTitle);
@@ -405,47 +355,35 @@ export function BoardListPage() {
                     ) : (
                       <>
                         <h3
-                          style={styles.boardTitle}
+                          className="text-base font-semibold text-text-primary m-0 cursor-pointer"
                           onClick={() => handleBoardClick(board.id)}
                         >
                           {board.title}
                         </h3>
-                        <div style={styles.boardStats}>
-                          <div style={styles.statItem}>
+                        <div className="flex gap-md text-xs text-text-secondary">
+                          <div className="flex items-center gap-xs">
                             <FiColumns size={14} />
                             {stats.columns} column{stats.columns !== 1 ? "s" : ""}
                           </div>
-                          <div style={styles.statItem}>
+                          <div className="flex items-center gap-xs">
                             <FiCheckSquare size={14} />
                             {stats.tasks} task{stats.tasks !== 1 ? "s" : ""}
                           </div>
                         </div>
-                        <div style={styles.boardActions}>
+                        <div className="flex gap-sm justify-end pt-md border-t border-border">
                           <button
-                            style={{ ...styles.iconButton, ...styles.editButton }}
+                            className="px-xs py-xs bg-transparent text-primary border-none rounded-md cursor-pointer text-base transition-all hover:bg-bg-tertiary"
                             onClick={() => {
                               setEditingBoardId(board.id);
                               setEditingBoardTitle(board.title);
-                            }}
-                            onMouseEnter={(e) => {
-                              (e.currentTarget as HTMLButtonElement).style.backgroundColor = colors.bgTertiary;
-                            }}
-                            onMouseLeave={(e) => {
-                              (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent";
                             }}
                           >
                             <FiEdit2 size={16} />
                           </button>
                           <button
-                            style={{ ...styles.iconButton, ...styles.deleteButton }}
+                            className="px-xs py-xs bg-transparent text-danger border-none rounded-md cursor-pointer text-base transition-all hover:bg-bg-tertiary"
                             onClick={() => {
                               setDeleteConfirmId(board.id);
-                            }}
-                            onMouseEnter={(e) => {
-                              (e.currentTarget as HTMLButtonElement).style.backgroundColor = colors.bgTertiary;
-                            }}
-                            onMouseLeave={(e) => {
-                              (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent";
                             }}
                           >
                             <FiTrash2 size={16} />
@@ -463,6 +401,7 @@ export function BoardListPage() {
 
       {deleteConfirmId && (
         <ConfirmModal
+          isOpen={true}
           title="Delete Board"
           message="Are you sure you want to delete this board? This action cannot be undone."
           confirmText="Delete"

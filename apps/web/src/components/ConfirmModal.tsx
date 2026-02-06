@@ -1,4 +1,4 @@
-import { colors, spacing, radius, shadows, baseModal, modalContent, primaryButton, dangerButton, secondaryButton } from "../lib/styles";
+'use client';
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -23,52 +23,30 @@ export function ConfirmModal({
 }: ConfirmModalProps) {
   if (!isOpen) return null;
 
-  const buttonStyle = isDangerous ? dangerButton : primaryButton;
-
   return (
-    <div style={baseModal} onClick={onCancel}>
+    <div
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-[1000]"
+      onClick={onCancel}
+    >
       <div
-        style={modalContent}
+        className="bg-bg-secondary rounded-lg shadow-xl border border-border p-lg max-w-md w-[90%] animate-slideInUp"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 style={{ marginBottom: spacing.md, color: colors.textPrimary }}>
-          {title}
-        </h2>
-        <p style={{ marginBottom: spacing.lg, color: colors.textSecondary }}>
-          {message}
-        </p>
+        <h2 className="mb-md text-text-primary font-semibold">{title}</h2>
+        <p className="mb-lg text-text-secondary">{message}</p>
 
-        <div
-          style={{
-            display: "flex",
-            gap: spacing.md,
-            justifyContent: "flex-end",
-          }}
-        >
+        <div className="flex gap-md justify-end">
           <button
             onClick={onCancel}
-            style={secondaryButton}
-            onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = colors.bgTertiary;
-              e.currentTarget.style.borderColor = colors.primary;
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = colors.bgTertiary;
-              e.currentTarget.style.borderColor = colors.border;
-            }}
+            className="px-md py-sm bg-bg-tertiary text-text-primary border border-border rounded-md font-medium text-sm transition-all hover:bg-bg-tertiary hover:border-primary"
           >
             {cancelText}
           </button>
           <button
             onClick={onConfirm}
-            style={buttonStyle}
-            onMouseOver={(e) => {
-              const bg = isDangerous ? colors.danger : colors.primary;
-              e.currentTarget.style.opacity = "0.9";
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.opacity = "1";
-            }}
+            className={`px-md py-sm rounded-md font-medium text-sm text-white border-none transition-opacity hover:opacity-90 ${
+              isDangerous ? "bg-danger" : "bg-primary"
+            }`}
           >
             {confirmText}
           </button>

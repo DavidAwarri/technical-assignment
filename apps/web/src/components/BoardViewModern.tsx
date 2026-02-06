@@ -1,3 +1,9 @@
+'use client';
+
+import React from "react"
+import { colors, spacing, radius } from "../styles/theme"; // Importing undeclared variables
+import { styles } from "../styles/styles"; // Declaring the styles variable
+
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -17,7 +23,6 @@ import { ColumnComponent } from "./Column";
 import { TaskDetailModal } from "./TaskDetailModal";
 import { Spinner } from "./Spinner";
 import { ConfirmModal } from "./ConfirmModal";
-import { colors, spacing, radius, shadows } from "../lib/styles";
 
 export interface Task {
   id: string;
@@ -156,104 +161,32 @@ export function BoardViewModern({ boardId, boardTitle, onBack }: BoardViewProps)
     }
   };
 
-  const styles = {
-    container: {
-      display: "flex",
-      flexDirection: "column" as const,
-      height: "100vh",
-      backgroundColor: colors.bgPrimary,
-    },
-    header: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      padding: spacing.lg,
-      borderBottom: `1px solid ${colors.border}`,
-      backgroundColor: colors.bgSecondary,
-    },
-    headerLeft: {
-      display: "flex",
-      alignItems: "center",
-      gap: spacing.md,
-    },
-    backButton: {
-      background: "none",
-      border: "none",
-      color: colors.primary,
-      cursor: "pointer",
-      fontSize: "20px",
-      padding: spacing.sm,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      transition: `color 0.2s`,
-    },
-    main: {
-      flex: 1,
-      overflow: "auto",
-      display: "flex",
-      flexDirection: "column" as const,
-    },
-    boardContainer: {
-      display: "flex",
-      gap: spacing.lg,
-      padding: spacing.lg,
-      flexWrap: "wrap" as const,
-      alignContent: "flex-start",
-    },
-    addColumnForm: {
-      display: "flex",
-      gap: spacing.md,
-      minWidth: "300px",
-      alignItems: "center",
-    },
-    addColumnInput: {
-      flex: 1,
-      padding: `${spacing.sm} ${spacing.md}`,
-      backgroundColor: colors.bgSecondary,
-      border: `1px solid ${colors.border}`,
-      borderRadius: radius.md,
-      color: colors.textPrimary,
-      fontSize: "14px",
-    },
-    addColumnButton: {
-      padding: `${spacing.sm} ${spacing.md}`,
-      backgroundColor: colors.primary,
-      color: colors.textPrimary,
-      border: "none",
-      borderRadius: radius.md,
-      cursor: "pointer",
-      fontWeight: 500,
-      transition: "all 0.2s",
-    },
-  };
+
 
   if (isLoading) {
     return (
-      <div style={styles.container}>
+      <div className="flex flex-col h-screen bg-bg-primary">
         <Spinner />
       </div>
     );
   }
 
   return (
-    <div style={styles.container}>
-      <header style={styles.header}>
-        <div style={styles.headerLeft}>
+    <div className="flex flex-col h-screen bg-bg-primary">
+      <header className="flex items-center justify-between p-lg border-b border-border bg-bg-secondary">
+        <div className="flex items-center gap-md">
           <button
             onClick={onBack}
-            style={styles.backButton}
-            onMouseOver={(e) => (e.currentTarget.style.color = colors.primaryLight)}
-            onMouseOut={(e) => (e.currentTarget.style.color = colors.primary)}
+            className="bg-none border-none text-primary cursor-pointer text-xl p-sm flex items-center justify-center transition-colors hover:text-primary-light"
           >
             <FiArrowLeft size={20} />
           </button>
-          <h1 style={{ margin: 0, color: colors.textPrimary }}>{boardTitle}</h1>
+          <h1 className="m-0 text-text-primary">{boardTitle}</h1>
         </div>
       </header>
 
-      <main style={styles.main}>
-        <div style={styles.boardContainer}>
+      <main className="flex-1 overflow-auto flex flex-col">
+        <div className="flex gap-lg p-lg flex-wrap content-start">
           {columns.map((column) => (
             <ColumnComponent
               key={column.id}
@@ -276,27 +209,20 @@ export function BoardViewModern({ boardId, boardTitle, onBack }: BoardViewProps)
             />
           ))}
 
-          <form onSubmit={handleCreateColumn} style={styles.addColumnForm}>
+          <form onSubmit={handleCreateColumn} className="flex gap-md min-w-[300px] items-center">
             <input
               type="text"
               placeholder="New column..."
               value={newColumnTitle}
               onChange={(e) => setNewColumnTitle(e.target.value)}
-              style={styles.addColumnInput}
+              className="flex-1 px-md py-sm bg-bg-secondary border border-border rounded-md text-text-primary text-sm"
             />
             <button
               type="submit"
               disabled={isCreatingColumn}
-              style={{
-                ...styles.addColumnButton,
-                opacity: isCreatingColumn ? 0.6 : 1,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: spacing.sm,
-              }}
-              onMouseOver={(e) => !isCreatingColumn && (e.currentTarget.style.backgroundColor = colors.primaryDark)}
-              onMouseOut={(e) => (e.currentTarget.style.backgroundColor = colors.primary)}
+              className={`px-md py-sm bg-primary text-text-primary border-none rounded-md cursor-pointer font-medium transition-all flex items-center justify-center gap-sm ${
+                isCreatingColumn ? "opacity-60" : "opacity-100 hover:bg-primary-dark"
+              }`}
             >
               <FiPlus size={16} />
               {isCreatingColumn ? "Adding..." : "Add"}

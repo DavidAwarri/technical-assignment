@@ -1,3 +1,7 @@
+'use client';
+
+import React from "react"
+
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -90,24 +94,36 @@ export function TaskDetailModal({ task, boardId, onClose, onRefresh }: TaskDetai
   };
 
   return (
-    <div style={styles.overlay} onClick={onClose}>
-      <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <button onClick={onClose} style={styles.closeButton}>
+    <div
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-md w-[90%] max-w-2xl max-h-[90vh] overflow-auto relative"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 p-xs text-xl bg-transparent border-none cursor-pointer text-gray-600"
+        >
           ✕
         </button>
 
-        <div style={styles.content}>
+        <div className="p-lg">
           {isEditingTitle ? (
-            <div style={styles.editGroup}>
+            <div className="flex flex-col gap-xs">
               <input
                 autoFocus
                 type="text"
                 value={editedTitle}
                 onChange={(e) => setEditedTitle(e.target.value)}
-                style={styles.editInput}
+                className="px-sm py-xs text-sm border border-gray-300 rounded-md font-inherit"
               />
-              <div style={styles.editActions}>
-                <button onClick={handleSaveTitle} style={styles.saveButton}>
+              <div className="flex gap-xs">
+                <button
+                  onClick={handleSaveTitle}
+                  className="flex-1 px-sm py-xs text-xs font-semibold text-white bg-green-600 border-none rounded cursor-pointer"
+                >
                   Save
                 </button>
                 <button
@@ -115,7 +131,7 @@ export function TaskDetailModal({ task, boardId, onClose, onRefresh }: TaskDetai
                     setEditedTitle(task.title);
                     setIsEditingTitle(false);
                   }}
-                  style={styles.cancelButton}
+                  className="flex-1 px-sm py-xs text-xs font-semibold text-white bg-gray-600 border-none rounded cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -123,7 +139,7 @@ export function TaskDetailModal({ task, boardId, onClose, onRefresh }: TaskDetai
             </div>
           ) : (
             <h2
-              style={styles.title}
+              className="mb-md text-xl font-semibold cursor-pointer"
               onClick={() => setIsEditingTitle(true)}
               title="Click to edit"
             >
@@ -131,18 +147,21 @@ export function TaskDetailModal({ task, boardId, onClose, onRefresh }: TaskDetai
             </h2>
           )}
 
-          <section style={styles.section}>
-            <h3 style={styles.sectionTitle}>Description</h3>
+          <section className="mb-lg">
+            <h3 className="mb-xs text-sm font-semibold text-gray-900">Description</h3>
             {isEditingDescription ? (
-              <div style={styles.editGroup}>
+              <div className="flex flex-col gap-xs">
                 <textarea
                   autoFocus
                   value={editedDescription}
                   onChange={(e) => setEditedDescription(e.target.value)}
-                  style={{ ...styles.editInput, minHeight: "80px" }}
+                  className="px-sm py-xs text-sm border border-gray-300 rounded-md font-inherit min-h-[80px]"
                 />
-                <div style={styles.editActions}>
-                  <button onClick={handleSaveDescription} style={styles.saveButton}>
+                <div className="flex gap-xs">
+                  <button
+                    onClick={handleSaveDescription}
+                    className="flex-1 px-sm py-xs text-xs font-semibold text-white bg-green-600 border-none rounded cursor-pointer"
+                  >
                     Save
                   </button>
                   <button
@@ -150,7 +169,7 @@ export function TaskDetailModal({ task, boardId, onClose, onRefresh }: TaskDetai
                       setEditedDescription(task.description || "");
                       setIsEditingDescription(false);
                     }}
-                    style={styles.cancelButton}
+                    className="flex-1 px-sm py-xs text-xs font-semibold text-white bg-gray-600 border-none rounded cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -158,13 +177,7 @@ export function TaskDetailModal({ task, boardId, onClose, onRefresh }: TaskDetai
               </div>
             ) : (
               <p
-                style={{
-                  ...styles.description,
-                  cursor: "pointer",
-                  backgroundColor: "#f9f9f9",
-                  padding: "8px",
-                  borderRadius: "4px",
-                }}
+                className="m-0 text-sm text-gray-600 leading-relaxed cursor-pointer bg-gray-50 p-xs rounded-md"
                 onClick={() => setIsEditingDescription(true)}
                 title="Click to edit"
               >
@@ -173,42 +186,47 @@ export function TaskDetailModal({ task, boardId, onClose, onRefresh }: TaskDetai
             )}
           </section>
 
-          <section style={styles.section}>
-            <h3 style={styles.sectionTitle}>
+          <section className="mb-lg">
+            <h3 className="mb-xs text-sm font-semibold text-gray-900">
               Comments ({currentTask.comments.length})
             </h3>
 
             {isLoading ? (
-              <div style={{ minHeight: "100px" }}>
+              <div className="min-h-[100px]">
                 <Spinner />
               </div>
             ) : (
-              <div style={styles.commentsList}>
+              <div className="mb-sm">
                 {currentTask.comments.map((comment) => (
-                  <div key={comment.id} style={styles.comment}>
-                    <strong style={styles.commentAuthor}>{comment.user.name}</strong>
-                    <p style={styles.commentContent}>{comment.content}</p>
+                  <div
+                    key={comment.id}
+                    className="p-xs bg-gray-50 rounded-md mb-xs"
+                  >
+                    <strong className="text-xs">{comment.user.name}</strong>
+                    <p className="m-0 mt-xs text-xs text-gray-900 leading-relaxed">
+                      {comment.content}
+                    </p>
                   </div>
                 ))}
               </div>
             )}
 
-            <form onSubmit={handleAddComment} style={styles.commentForm}>
+            <form onSubmit={handleAddComment} className="flex flex-col gap-xs">
               <textarea
                 value={newCommentContent}
                 onChange={(e) => setNewCommentContent(e.target.value)}
                 placeholder="Add a comment..."
-                style={styles.commentInput}
                 disabled={isAddingComment}
+                className="px-sm py-xs text-xs border border-gray-300 rounded-md font-inherit min-h-[60px]"
               />
               <button
                 type="submit"
-                style={{
-                  ...styles.commentButton,
-                  opacity: isAddingComment || !newCommentContent.trim() ? 0.6 : 1,
-                  cursor: isAddingComment || !newCommentContent.trim() ? "not-allowed" : "pointer",
-                }}
                 disabled={isAddingComment || !newCommentContent.trim()}
+                className={`px-sm py-xs text-xs font-semibold text-white bg-blue-600 border-none rounded ${
+                  isAddingComment || !newCommentContent.trim()
+                    ? "opacity-60 cursor-not-allowed"
+                    : "opacity-100 cursor-pointer"
+                }`}
               >
                 {isAddingComment ? "Adding..." : "Add comment"}
               </button>
@@ -219,134 +237,3 @@ export function TaskDetailModal({ task, boardId, onClose, onRefresh }: TaskDetai
     </div>
   );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  overlay: {
-    position: "fixed",
-    inset: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 1000,
-  },
-  modal: {
-    backgroundColor: "white",
-    borderRadius: "8px",
-    width: "90%",
-    maxWidth: "600px",
-    maxHeight: "90vh",
-    overflow: "auto",
-    position: "relative",
-  },
-  closeButton: {
-    position: "absolute",
-    top: "12px",
-    right: "12px",
-    padding: "4px 8px",
-    fontSize: "20px",
-    backgroundColor: "transparent",
-    border: "none",
-    cursor: "pointer",
-    color: "#999",
-  },
-  content: {
-    padding: "24px",
-  },
-  title: {
-    margin: "0 0 16px 0",
-    fontSize: "20px",
-    fontWeight: 600,
-  },
-  section: {
-    marginBottom: "24px",
-  },
-  sectionTitle: {
-    margin: "0 0 12px 0",
-    fontSize: "14px",
-    fontWeight: 600,
-    color: "#333",
-  },
-  description: {
-    margin: 0,
-    fontSize: "14px",
-    color: "#666",
-    lineHeight: "1.5",
-  },
-  editGroup: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "8px",
-  },
-  editInput: {
-    padding: "8px 12px",
-    fontSize: "14px",
-    border: "1px solid #ddd",
-    borderRadius: "4px",
-    fontFamily: "inherit",
-  },
-  editActions: {
-    display: "flex",
-    gap: "8px",
-  },
-  saveButton: {
-    flex: 1,
-    padding: "6px 12px",
-    fontSize: "13px",
-    backgroundColor: "#00aa00",
-    color: "white",
-    border: "none",
-    borderRadius: "3px",
-    cursor: "pointer",
-  },
-  cancelButton: {
-    flex: 1,
-    padding: "6px 12px",
-    fontSize: "13px",
-    backgroundColor: "#999",
-    color: "white",
-    border: "none",
-    borderRadius: "3px",
-    cursor: "pointer",
-  },
-  commentsList: {
-    marginBottom: "12px",
-  },
-  comment: {
-    padding: "8px",
-    backgroundColor: "#f9f9f9",
-    borderRadius: "4px",
-    marginBottom: "8px",
-  },
-  commentAuthor: {
-    fontSize: "13px",
-  },
-  commentContent: {
-    margin: "4px 0 0 0",
-    fontSize: "13px",
-    color: "#333",
-    lineHeight: "1.4",
-  },
-  commentForm: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "8px",
-  },
-  commentInput: {
-    padding: "8px 12px",
-    fontSize: "13px",
-    border: "1px solid #ddd",
-    borderRadius: "4px",
-    fontFamily: "inherit",
-    minHeight: "60px",
-  },
-  commentButton: {
-    padding: "8px 12px",
-    fontSize: "13px",
-    fontWeight: 600,
-    backgroundColor: "#0066cc",
-    color: "white",
-    border: "none",
-    borderRadius: "4px",
-  },
-};
